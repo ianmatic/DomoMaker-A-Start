@@ -7,6 +7,7 @@ const signupPage = (req, res) => {
   res.render('signup');
 };
 const logout = (req, res) => {
+  req.session.destroy();
   res.redirect('/');
 };
 
@@ -23,10 +24,12 @@ const login = (req, res) => {
 
   return Account.AccountModel.authenticate(username, password, (err, account) => {
     if (err || !account) {
-      return res.status(401).json({ error: 'Wrong username or password' });
+      return rs.status(401).json({ error: 'Wrong username or password' });
     }
 
-    return res.json({ redirect: '/maker' });
+    rq.session.account = Account.AccountModel.toAPI(account);
+
+    return rs.json({ redirect: '/maker' });
   });
 };
 
@@ -57,7 +60,10 @@ const signup = (req, res) => {
 
     const savePromise = newAccount.save();
 
-    savePromise.then(() => rs.json({ redirect: '/maker' }));
+    savePromise.then(() => {
+      rq.session.account = Account.AccountModel.toAPI(newAccount);
+      return rs.json({ redirect: '/maker' });
+    });
 
     savePromise.catch((err) => {
       console.log(err);
@@ -66,7 +72,7 @@ const signup = (req, res) => {
         return rs.status(400).json({ error: 'Username already in use.' });
       }
 
-      return res.status(400).json({ error: 'An error occurred' });
+      return rs.status(400).json({ error: 'An error occurred' });
     });
   });
 };
