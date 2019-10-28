@@ -45,7 +45,7 @@ app.use(session({
   store: new RedisStore({
     host: redisURL.hostname,
     port: redisURL.port,
-    pass: redisPASS
+    pass: redisPASS,
   }),
   secret: 'Domo Arigato',
   resave: true,
@@ -63,6 +63,7 @@ app.use((err, req, res, next) => {
   if (err.code !== 'EBADCSRFTOKEN') return next(err);
 
   console.log('Missing CSRF token');
+  return false;
 });
 router(app);
 
