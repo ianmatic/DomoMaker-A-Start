@@ -3,9 +3,6 @@ const Account = models.Account;
 const loginPage = (req, res) => {
   res.render('login', { csrfToken: req.csrfToken() });
 };
-const signupPage = (req, res) => {
-  res.render('signup', { csrfToken: req.csrfToken() });
-};
 const logout = (req, res) => {
   req.session.destroy();
   res.redirect('/');
@@ -76,9 +73,19 @@ const signup = (req, res) => {
     });
   });
 };
+const getToken = (req, res) => {
+  const rq = req;
+  const rs = res;
+
+  const csrfJSON = {
+    csrfToken: rq.csrfToken(),
+  };
+
+  rs.json(csrfJSON);
+};
 
 module.exports.loginPage = loginPage;
 module.exports.login = login;
 module.exports.logout = logout;
-module.exports.signupPage = signupPage;
 module.exports.signup = signup;
+module.exports.getToken = getToken;

@@ -35,5 +35,20 @@ const makeDomo = (req, res) => {
   });
   return domoPromise;
 };
+
+const getDomos = (req, res) => {
+  const rq = req;
+  const rs = res;
+
+  return Domo.DomoModel.findByOwner(rq.session.account._id, (err, docs) => {
+    if (err) {
+      console.log(err);
+      return rs.status(400).json({ error: 'An error occurred' });
+    }
+
+    return rs.json({ domos: docs });
+  });
+};
 module.exports.makerPage = makerPage;
+module.exports.getDomos = getDomos;
 module.exports.makeDomo = makeDomo;
