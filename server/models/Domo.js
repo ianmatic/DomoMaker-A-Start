@@ -27,6 +27,11 @@ const DomoSchema = new mongoose.Schema({
     ref: 'Account',
   },
 
+  id: {
+    type: Number,
+    required: true
+  },
+
   createdData: {
     type: Date,
     default: Date.now,
@@ -44,6 +49,10 @@ DomoSchema.statics.findByOwner = (ownerId, callback) => {
   };
 
   return DomoModel.find(search).select('name age').exec(callback);
+};
+
+DomoSchema.statics.delete = (uniqueid) => {
+    return DomoModel.findOneAndDelete(uniqueid);
 };
 
 DomoModel = mongoose.model('Domo', DomoSchema);
