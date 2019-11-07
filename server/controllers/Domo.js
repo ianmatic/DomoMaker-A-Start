@@ -10,17 +10,16 @@ const makerPage = (req, res) => {
   });
 };
 
-let uniqueid = 0;
 const makeDomo = (req, res) => {
-  if (!req.body.name || !req.body.age) {
-    return res.status(400).json({ error: 'RAWR! Both name and age are required' });
+  if (!req.body.name || !req.body.age || !req.body.thickness) {
+    return res.status(400).json({ error: 'RAWR! Name age, and thickness are required' });
   }
 
   const domoData = {
     name: req.body.name,
     age: req.body.age,
     owner: req.session.account._id,
-    id: uniqueid
+    thickness: req.body.thickness,
   };
 
   const newDomo = new Domo.DomoModel(domoData);
@@ -35,9 +34,6 @@ const makeDomo = (req, res) => {
 
     return res.status(400).json({ error: 'An error occurred' });
   });
-
-  // successfully created a new Domo
-  uniqueid++;
   return domoPromise;
 };
 
@@ -56,7 +52,16 @@ const getDomos = (req, res) => {
 };
 
 const deleteDomo = (req, res) => {
-  
+  const rq = req;
+  const rs = res;
+  return Domo.DomoModel.delete(rq.body.uniqueid, (err, docs) => {
+    if (err) {
+      console.log(err);
+      return rs.status(400).json({ error: 'An error occurred' });
+    }
+
+    return rs.json({ domo: docs });
+  });
 };
 module.exports.makerPage = makerPage;
 module.exports.getDomos = getDomos;

@@ -4,7 +4,7 @@ var handleDomo = function handleDomo(e) {
     e.preventDefault();
 
     $("#domoMessage").animate({ width: 'hide' }, 350);
-    if ($("#domoname").val() == '' || $("#domoAge").val() == '') {
+    if ($("#domoname").val() == '' || $("#domoAge").val() == '' || $("#domoThickness").val() == '') {
         handleError("RAWR! All fields are required");
         return false;
     }
@@ -14,6 +14,21 @@ var handleDomo = function handleDomo(e) {
     });
 
     return false;
+};
+
+var csrfToken = void 0;
+var domoToDelete = void 0;
+
+var deleteDomo = function deleteDomo(e) {
+    e.preventDefault();
+
+    // get the id of the domo to be deleted
+    var selectedDomo = "uniqueid=" + e.target.parentElement.getAttribute("data-id") + "&_csrf=" + csrfToken;
+    domoToDelete = e.target.parentElement;
+    sendAjax('DELETE', "/maker", selectedDomo, function () {
+        domoToDelete.remove();
+        domoToDelete = "";
+    });
 };
 
 var DomoForm = function DomoForm(props) {
@@ -38,6 +53,12 @@ var DomoForm = function DomoForm(props) {
             "Age: "
         ),
         React.createElement("input", { id: "domoAge", type: "text", name: "age", placeholder: "Domo Age" }),
+        React.createElement(
+            "label",
+            { htmlFor: "thickness" },
+            "Thickness: "
+        ),
+        React.createElement("input", { id: "domoThickness", type: "text", name: "thickness", placeholder: "Domo Thickness" }),
         React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
         React.createElement("input", { className: "makeDomoSubmit", type: "submit", value: "Make Domo" })
     );
@@ -59,7 +80,7 @@ var DomoList = function DomoList(props) {
     var domoNodes = props.domos.map(function (domo) {
         return React.createElement(
             "div",
-            { key: domo._id, className: "domo" },
+            { key: domo._id, "data-id": domo._id, className: "domo" },
             React.createElement("img", { src: "/assets/img/domoface.jpeg", alt: "domo face", className: "domoFace" }),
             React.createElement(
                 "h3",
@@ -74,6 +95,17 @@ var DomoList = function DomoList(props) {
                 " Age: ",
                 domo.age,
                 " "
+            ),
+            React.createElement(
+                "h3",
+                { className: "domoThickness" },
+                "Thickness: ",
+                domo.thickness
+            ),
+            React.createElement(
+                "button",
+                { className: "deleteButton", onClick: deleteDomo },
+                "Delete"
             )
         );
     });
@@ -99,6 +131,7 @@ var setup = function setup(csrf) {
 
 var getToken = function getToken() {
     sendAjax('GET', '/getToken', null, function (result) {
+        csrfToken = result.csrfToken;
         setup(result.csrfToken);
     });
 };

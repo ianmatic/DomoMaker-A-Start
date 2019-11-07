@@ -2,7 +2,7 @@ const handleDomo = (e) => {
     e.preventDefault();
 
     $("#domoMessage").animate({ width: 'hide' }, 350);
-    if ($("#domoname").val() == '' || $("#domoAge").val() == '') {
+    if ($("#domoname").val() == '' || $("#domoAge").val() == '' || $("#domoThickness").val() == '') {
         handleError("RAWR! All fields are required");
         return false;
     }
@@ -14,13 +14,18 @@ const handleDomo = (e) => {
     return false;
 };
 
+let csrfToken;
+let domoToDelete;
+
 const deleteDomo = (e) => {
     e.preventDefault();
 
     // get the id of the domo to be deleted
-    const selectedDomo = this.parent.id;
-    sendAjax('DELETE', "/maker", selectedDomo, function() {
-        $(`#${selectedDomo}`).remove();
+    var selectedDomo = `uniqueid=${e.target.parentElement.getAttribute("data-id")}&_csrf=${csrfToken}`;
+    domoToDelete = e.target.parentElement;
+    sendAjax('DELETE', "/maker", selectedDomo, () => {
+        domoToDelete.remove();
+        domoToDelete = "";
     });
 }
 
@@ -37,13 +42,15 @@ const DomoForm = (props) => {
             <input id="domoName" type="text" name="name" placeholder="Domo Name" />
             <label htmlFor="age">Age: </label>
             <input id="domoAge" type="text" name="age" placeholder="Domo Age" />
+            <label htmlFor="thickness">Thickness: </label>
+            <input id="domoThickness" type="text" name="thickness" placeholder="Domo Thickness" />
             <input type="hidden" name="_csrf" value={props.csrf} />
             <input className="makeDomoSubmit" type="submit" value="Make Domo" />
         </form>
     );
 };
 
-const DomoList = function(props) {
+const DomoList = function (props) {
     if (props.domos.length === 0) {
         return (
             <div className="domoList">
@@ -52,13 +59,14 @@ const DomoList = function(props) {
         );
     }
 
-    const domoNodes = props.domos.map(function(domo) {
+    const domoNodes = props.domos.map(function (domo) {
         return (
-            <div key={domo._id} className="domo">
-                <img src="/assets/img/domoface.jpeg" alt="domo face" className="domoFace"/>
+            <div key={domo._id} data-id={domo._id} className="domo">
+                <img src="/assets/img/domoface.jpeg" alt="domo face" className="domoFace" />
                 <h3 className="domoName"> Name: {domo.name} </h3>
                 <h3 className="domoAge"> Age: {domo.age} </h3>
-                <button className="deleteButton"onClick={deleteDomo}>Delete</button>
+                <h3 className="domoThickness">Thickness: {domo.thickness}</h3>
+                <button className="deleteButton" onClick={deleteDomo}>Delete</button>
             </div>
         );
     });
@@ -78,7 +86,7 @@ const loadDomosFromServer = () => {
     });
 };
 
-const setup = function(csrf) {
+const setup = function (csrf) {
     ReactDOM.render(
         <DomoForm csrf={csrf} />, document.querySelector("#makeDomo")
     );
@@ -90,10 +98,11 @@ const setup = function(csrf) {
 
 const getToken = () => {
     sendAjax('GET', '/getToken', null, (result) => {
+        csrfToken = result.csrfToken;
         setup(result.csrfToken);
     });
 };
 
-$(document).ready(function() {
+$(document).ready(function () {
     getToken();
 })

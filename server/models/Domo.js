@@ -27,9 +27,10 @@ const DomoSchema = new mongoose.Schema({
     ref: 'Account',
   },
 
-  id: {
+  thickness: {
     type: Number,
-    required: true
+    min: 0,
+    required: true,
   },
 
   createdData: {
@@ -41,6 +42,7 @@ const DomoSchema = new mongoose.Schema({
 DomoSchema.statics.toAPI = (doc) => ({
   name: doc.name,
   age: doc.age,
+  thickness: doc.thickness,
 });
 
 DomoSchema.statics.findByOwner = (ownerId, callback) => {
@@ -48,12 +50,10 @@ DomoSchema.statics.findByOwner = (ownerId, callback) => {
     owner: convertId(ownerId),
   };
 
-  return DomoModel.find(search).select('name age').exec(callback);
+  return DomoModel.find(search).select('name age thickness').exec(callback);
 };
 
-DomoSchema.statics.delete = (uniqueid) => {
-    return DomoModel.findOneAndDelete(uniqueid);
-};
+DomoSchema.statics.delete = (id, callback) => DomoModel.findByIdAndRemove(id).exec(callback);
 
 DomoModel = mongoose.model('Domo', DomoSchema);
 
